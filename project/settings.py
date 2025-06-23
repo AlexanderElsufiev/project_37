@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.yandex',
     'sign',
     'protect',
-    'appointment',
     # 'news',  # меняю .ту строку на следующую, чтобы работали сигналы для почты
     'news.apps.NewsConfig',
     'django_apscheduler', # ЭТО ДЛЯ ПЕРИОДИЧЕСКИХ ЗАДАЧ

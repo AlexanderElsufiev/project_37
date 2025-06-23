@@ -28,18 +28,14 @@ urlpatterns = [
    # подключались к главному приложению с префиксом products/.
    # path('posts/', include('news.urls')),
    path('news/', include('news.urls_news')),
-    # path('articles/', include('news.urls_articles')), ######## НОВОЕ
-    # path('subscribe/', include('news.urls_subscribe')),
-   # path('', include('news.urls')), # пока убрал чтобы не конфликтовало, не знаю правильный вариант
-
     # ДОБАВКИ
-    path('', include('protect.urls')), # пока убрал чтобы не конфликтовало, не знаю правильный вариант
+    path('', include('protect.urls')),
     path('sign/', include('sign.urls')),
     path('accounts/', include('allauth.urls')),
 
     # ПОЧТА
     # path('appointments/', include('appointments.urls')), #этот вариант здесь не работает - непонятно почему!
-    path('appointments/', include(('appointment.urls', 'appointments'), namespace='appointments')),
+    # path('appointments/', include(('appointment.urls', 'appointments'), namespace='appointments')),
 
     # path('articles/', ArtList.as_view(), name='art_list'),
 ]

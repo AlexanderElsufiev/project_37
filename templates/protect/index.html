@@ -1,5 +1,3 @@
-<!--<h1>Добро пожаловать!</h1>-->
-<!--<h1>Этот файл порекоменедован затычкой ChatGPT именно по этому адресу, без объяснений причин!</h1>-->
 
 {% extends "main.html" %}
 
@@ -11,24 +9,17 @@
 <button> <a href="sign/upgrade/"> Хочу БЫТЬ АВТОРОМ!</a> </button>
 {% endif %}</h2>
 
-<h2>Подписка на категории новостей</h2>
+<!--<h2>Подписка на категории новостей</h2>-->
 <!--<form method="post">-->
-<!--<form method="post" href="subscribe/">-->
+<!--<button> <a href="subscribe/">подписаться </a> </button>-->
+<!--</form>-->
 
-<form method="post">
-<!--    {% csrf_token %}-->
-<!--    {{ form.as_p }}-->
-<!--<button type="submit">Подписаться</button>-->
-<button> <a href="subscribe/">подписаться </a> </button>
-</form>
-
-<!--<h2><button> <a href="subscribe/">подписка кнопка</a> </button></h2>-->
 
 
 <h2>
 <button> <a href="news/">ВОЙТИ НА САЙТ News</a> </button>
 </h2>
-<!--<button> <a href="sign/logout/">Выйти</a> </button>-->
+
 <form method="post" action="{% url 'account_logout' %}">
     {% csrf_token %}
     <button type="submit">Выйти</button>

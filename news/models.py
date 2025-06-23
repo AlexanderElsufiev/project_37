@@ -7,27 +7,27 @@ from django.db.models import Sum
 from django.contrib.auth.models import User
 
 
-class Author(models.Model):
-   # user = models.ForeignKey(User, on_delete=models.CASCADE)
-   # сделаем максимум 1 автора на 1 пользователя
-   user = models.OneToOneField(User, on_delete=models.CASCADE)
-   raiting = models.IntegerField(default=0)
-   # kolzap = models.IntegerField(default=0)
-   # timezap = models.DateTimeField(auto_now_add=True)
-
-   def __str__(self):
-       return self.user.username
-
-   def update_rating(self):
-       # 1. Суммарный рейтинг всех постов автора, умноженный на 3
-       raiting_post = self.author_post.aggregate(total=models.Sum('raiting'))['total'] or 0
-       raiting_comm = self.user.user_comm.aggregate(total=models.Sum('raiting'))['total'] or 0
-       raiting_post_comm = Comment.objects.filter(post__author=self).aggregate(total=models.Sum('raiting'))[
-                                      'total'] or 0
-       # raiting_post_comm = self.author_post.all().post_comm.(total=models.Sum('raiting'))['total'] or 0
-       self.raiting = raiting_post*3+raiting_comm+raiting_post_comm
-       self.save()
-
+# class Author(models.Model):
+#    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+#    # сделаем максимум 1 автора на 1 пользователя
+#    user = models.OneToOneField(User, on_delete=models.CASCADE)
+#    raiting = models.IntegerField(default=0)
+#    # kolzap = models.IntegerField(default=0)
+#    # timezap = models.DateTimeField(auto_now_add=True)
+#
+#    def __str__(self):
+#        return self.user.username
+#
+#    def update_rating(self):
+#        # 1. Суммарный рейтинг всех постов автора, умноженный на 3
+#        raiting_post = self.author_post.aggregate(total=models.Sum('raiting'))['total'] or 0
+#        raiting_comm = self.user.user_comm.aggregate(total=models.Sum('raiting'))['total'] or 0
+#        raiting_post_comm = Comment.objects.filter(post__author=self).aggregate(total=models.Sum('raiting'))[
+#                                       'total'] or 0
+#        # raiting_post_comm = self.author_post.all().post_comm.(total=models.Sum('raiting'))['total'] or 0
+#        self.raiting = raiting_post*3+raiting_comm+raiting_post_comm
+#        self.save()
+#
 
 class Category(models.Model):
     category = models.CharField(max_length=50, default='', unique=True)
@@ -47,7 +47,6 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_post') # только 1 категория на пост
 
     # авторы
-    # author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='author_post')
     user = models.ForeignKey(User, on_delete = models.CASCADE, related_name='user_post')
 
     # ТИП стаитья или новость
@@ -135,13 +134,13 @@ class Comment(models.Model):
 
     def send_new_comment_email(self):
         """Отправка email автору поста о новом комментарии"""
-        post_author = self.post.user
+        post_user = self.post.user
         # Не отправляем письмо, если автор комментария = автор поста
-        # if self.user == post_author or not post_author.email:return
+        # if self.user == post_user or not post_user.email:return
 
         subject = f'Новый комментарий к вашему посту'
         message = f'''
-    Здравствуйте, {post_author.username}!
+    Здравствуйте, {post_user.username}!
     К вашему посту "{self.post.zagolov}" добавлен новый комментарий.
     Автор комментария: {self.user.username}
     Комментарий: "{self.comment}"
@@ -155,7 +154,7 @@ class Comment(models.Model):
             send_mail(
                 subject=subject,message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[post_author.email],
+                recipient_list=[post_user.email],
                 fail_silently=False,
             )
         except Exception as e:print(f"Ошибка отправки email: {e}")

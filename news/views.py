@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView,DetailView, CreateView, UpdateView, DeleteView
 
-from .models import Post, Author, Comment
+from .models import Post, Comment
 from .filters import PostFilter
 from .forms import PostForm
 
@@ -16,40 +16,12 @@ from datetime import date
 
 
 # ДЛЯ ПОДПИСКИ ПОЛЬЗОВАТЕЛЯ
-# from .models import Subscribers
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-# from .forms import SubscriptionForm
-
 from .models import  MediaFile
 from .forms import PostForm, MediaFileFormSet
 from django.db import transaction
 
 from django.db import models
 
-# ПОДПИСКИ УДАЛЯЮ
-# @login_required
-# def subscribe_view(request):
-#     if request.method == 'POST':
-#         form = SubscriptionForm(request.POST)
-#         if form.is_valid():
-#             categories = form.cleaned_data['categories']
-#             # Удаляем существующие подписки пользователя
-#             Subscribers.objects.filter(user=request.user).delete()
-#             # Создаем новые подписки
-#             for category in categories:
-#                 Subscribers.objects.create(user=request.user, category=category)
-#             # return redirect('subscription_success')  # Перенаправление после успешной подписки
-#             return redirect('/')  # Перенаправление после успешной подписки  было redirect('news/')
-#     else:
-#         # form = SubscriptionForm() #так мы брали пустые категории, даже если уже были
-#         # Получаем текущие категории, на которые подписан пользователь
-#         user_categories = Subscribers.objects.filter(user=request.user).values_list('category', flat=True)
-#         form = SubscriptionForm(initial={'categories': user_categories})
-#     return render(request, 'protect/index_subscribe.html', {'form': form})
-
-
-# ВСЁ ОСТАЛЬНОЕ
 
 
 class PostsList(ListView):
@@ -66,12 +38,6 @@ class PostsList(ListView):
     # context_object_name = 'products' - меняем на Посты - пока не знаю где их описать - ЭТО АДРЕС ССЫЛКИ
     context_object_name = 'posts'
     paginate_by = 8  # вот так мы можем указать количество записей на странице
-
-# class ArtList(PostsList):
-#     paginate_by = 6
-#     # показываем только статьи
-#     def get_queryset(self):
-#         return Post.objects.filter(tip='t').order_by('-time_in')
 
 
 
@@ -97,14 +63,13 @@ class PostsListPrivat(LoginRequiredMixin, ListView):
         queryset = Post.objects.filter(user=self.request.user).annotate(
         # queryset=Post.objects.annotate(
             app_count=Count('post_comm',filter=Q(post_comm__stat='1'))
-            ,app_count2=Count('post_comm',filter=Q(post_comm__stat='2'))
+            # ,app_count2=Count('post_comm',filter=Q(post_comm__stat='2'))
             , app_count3=Count('post_comm',filter=Q(post_comm__stat__in=['1','2']))
         ).order_by('-time_in')
 
         # Фильтрация по наличию новых комментариев
         show_new = self.request.GET.get('with_comments', False)
-        if show_new:
-            queryset = queryset.filter(app_count__gt=0)
+        if show_new:queryset = queryset.filter(app_count__gt=0)
 
         return queryset
 
@@ -144,12 +109,6 @@ class PostsListSearch(ListView):
             query_params.pop('page')
         context['filter_query'] = query_params.urlencode()
         return context
-
-# class ArtListSearch(PostsListSearch):  # наследуется всё что можно из первого варианта
-#     def get_queryset(self):
-#         queryset = super().get_queryset().filter(tip='t').order_by('-time_in')
-#         self.filterset = PostFilter(self.request.GET, queryset)
-#         return self.filterset.qs
 
 
 # ДОБАВЛЯЕМ НОВЫЙ КЛАСС
@@ -200,10 +159,6 @@ class PostPrivatDetail (PostDetail):
         return context
 
 
-# class ArtDetail (PostDetail):
-#     pass
-
-
 
 # Добавляем новое представление для создания товаров.
 class PostCreate(PermissionRequiredMixin, CreateView):
@@ -229,30 +184,6 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         return context
 
 
-    # СТАРЫЙ ВАРИАНТ ЗАМЕНЯЕТСЯ НОВЫМ - ПРОВЕРИТЬ НАСКОЛЬКО ВОБЩЕ ПРАВИЛЬНО
-    # def form_valid(self, form):
-    #     # # НОВОЕ - ОГРАНИЧЕНИЕ НА КОЛИЧСЕСТВО ПОСТОВ - ТОЖЕ НЕ РАБОТАЕТ, НЕТ АВТОРА
-    #     # post=form.save(commit=False)
-    #     # today = date.today()  # # today=datetime.date.today()
-    #     # zag=post.zagolov
-    #     # print('ZAGOLOV='+zag)
-    #     # author=post.author
-    #     # kolzap=Post.objects.filter(author=author,time_in__date=today).count()
-    #     # if kolzap>=6:
-    #     #     return render(self.request,'post_limit.html',{'author':author})
-    #     # post.save() #не понимаю зачем команда!
-    #
-    #     # ТО ЧТО БЫЛО РАНЬШЕ - ПОСТАНОВКА ВСЕХ ПАРАМЕТРОВ ПОСТА
-    #     # form.instance.tip = self.param  # Новость - из параметра
-    #     user = self.request.user # Получаем текущего пользователя
-    #     print(f'user={user}')
-    #     author, created = Author.objects.get_or_create(user=user) # Получаем или создаем объект Author, связанный с текущим пользователем
-    #     print(f'user={user} author={author}')
-    #     # form.instance.author = author  # Устанавливаем автора поста
-    #     form.instance.user = user  # Устанавливаем автора поста
-    #     print(f'form=={form.instance}')
-    #     return super().form_valid(form)
-
     def form_valid(self, form):
         context = self.get_context_data()
         media_formset = context['media_formset']
@@ -260,8 +191,8 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         with transaction.atomic():
             user = self.request.user
             print(f'user={user}')
-            author, created = Author.objects.get_or_create(user=user)
-            print(f'user={user} author={author}')
+            # author, created = Author.objects.get_or_create(user=user)
+            # print(f'user={user} author={author}')
             form.instance.user = user
             print(f'form=={form.instance}')
 
@@ -284,10 +215,6 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         return self.render_to_response(context)
 
 
-# class ArtCreate(PostCreate):
-#     param = 't'  # будем писать как кстатью
-#     success_url = reverse_lazy('art_list')
-
 # Добавляем представление для изменения товара.
 class PostUpdate(PermissionRequiredMixin, UpdateView):
     permission_required = ('news.change_post',)  # название права на добавление постов
@@ -297,16 +224,11 @@ class PostUpdate(PermissionRequiredMixin, UpdateView):
     # путь после успешного ввода
     success_url = reverse_lazy('post_list')
 
-# class ArtUpdate(PostUpdate):
-#     success_url = reverse_lazy('art_list')
-
-
 # Представление удаляющее товар.
 class PostDelete(PermissionRequiredMixin, DeleteView):
     permission_required = ('news.delete_post',)  # название права на добавление постов
     model = Post
     template_name = 'post_delete.html'
-    # путь после успешного ввода
     success_url = reverse_lazy('post_list')
 
 
@@ -351,32 +273,6 @@ class PostCommentView(LoginRequiredMixin, DetailView):
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-
-#
-# @login_required
-# def comment_moderate(request, comment_id):
-#     """Модерация комментария автором поста"""
-#     comment = get_object_or_404(Comment, id=comment_id)
-#
-#     # Проверяем, что текущий пользователь - автор поста
-#     if request.user != comment.post.user:
-#         return HttpResponseForbidden("У вас нет прав для модерации этого комментария")
-#
-#     # Проверяем, что это не комментарий самого автора поста
-#     # if comment.user == comment.post.user:
-#     #     return HttpResponseForbidden("Нельзя модерировать собственные комментарии")
-#
-#     if request.method == 'POST':
-#         action = request.POST.get('action')
-#
-#         if action == 'approve':
-#             comment.like()  # Используем метод из модели
-#         elif action == 'reject':
-#             comment.dislike()  # Используем метод из модели
-#
-#     # Возвращаемся на страницу поста
-#     return redirect('news:post_detail', pk=comment.post.pk)  # Замените на правильное имя URL
-
 
 
 @login_required
