@@ -1,0 +1,58 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h1> НОВОСТЬ/статья корректировка  =post_edit.html </h1>
+<hr>
+<!--Название метода Post который будет осуществлять отправку формы-->
+
+<!--<form action="" method="post">-->
+<!--    {% csrf_token %}-->
+<!--&lt;!&ndash;    ссылка на сгенерированный из form html-код&ndash;&gt;-->
+<!--    {{ form.as_p }}-->
+<!--&lt;!&ndash;кнопка отправки формы                  &ndash;&gt;-->
+<!--    <input type="submit" value="Save" />-->
+<!--</form>-->
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h3>Существующие медиафайлы:</h3>
+    {% for media in object.media_files.all %}
+        <p>{{ media.file.name }} - {{ media.get_media_type_display }}
+        {% if media.title %} - {{ media.title }}{% endif %}</p>
+    {% endfor %}
+
+    {{ media_formset.management_form }}
+
+    {% for media_form in media_formset %}
+        {{ media_form.file.label_tag }}
+        {{ media_form.file }}
+        {{ media_form.file.errors }}
+
+        {{ media_form.media_type.label_tag }}
+        {{ media_form.media_type }}
+        {{ media_form.media_type.errors }}
+
+        {{ media_form.title.label_tag }}
+        {{ media_form.title }}
+        {{ media_form.title.errors }}
+
+        {{ media_form.description.label_tag }}
+        {{ media_form.description }}
+        {{ media_form.description.errors }}
+
+        {% if media_form.DELETE %}
+            {{ media_form.DELETE }} Удалить
+        {% endif %}
+
+        {% for hidden in media_form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+    {% endfor %}
+
+    <button type="submit">Сохранить изменения</button>
+</form>
+
+{% endblock content %}
+

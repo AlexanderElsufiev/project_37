@@ -1,0 +1,55 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h1> НОВОСТЬ/статья СОЗДАНИЕ </h1>
+<hr>
+<!--Название метода Post который будет осуществлять отправку формы-->
+<!--<form action="" method="post">-->
+<!--    {% csrf_token %}-->
+<!--&lt;!&ndash;    ссылка на сгенерированный из form html-код&ndash;&gt;-->
+<!--&lt;!&ndash;    # неявно ссылается на способы создания из программы news/views.py&ndash;&gt;-->
+<!--    {{ form.as_p }}-->
+
+<!--&lt;!&ndash;кнопка отправки формы                  &ndash;&gt;-->
+<!--    <input type="submit" value="Save" />-->
+
+<!--</form>-->
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+        <br>
+    <button type="submit">Создать пост</button>
+
+    {{ media_formset.management_form }}
+
+    {% for media_form in media_formset %}
+    <br>
+<!--    <br>1 Сам файл-->
+        {{ media_form.file.label_tag }}
+        {{ media_form.file }}
+        {{ media_form.file.errors }}
+<!--<br>2 Тип файла-->
+        {{ media_form.media_type.label_tag }}
+        {{ media_form.media_type }}
+        {{ media_form.media_type.errors }}
+<!--<br>3 Название файла для статьи-->
+<!--        {{ media_form.title.label_tag }}-->
+<!--        {{ media_form.title }}-->
+<!--        {{ media_form.title.errors }}-->
+<!--<br>4 Описание файла для статьи-->
+<!--        {{ media_form.description.label_tag }}-->
+<!--        {{ media_form.description }}-->
+<!--        {{ media_form.description.errors }}-->
+
+        {% for hidden in media_form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+    {% endfor %}
+
+</form>
+
+
+
+{% endblock content %}
+

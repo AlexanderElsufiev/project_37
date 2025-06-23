@@ -1,0 +1,20 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h1> написание комментария к посту  =post_comment.html </h1>
+<hr>
+{{ post.zagolov }}
+{{ post.text }}
+Автор: {{ post.user }}
+
+Добавить комментарий:
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Отправить комментарий</button>
+</form>
+
+<a href="/news/{{ post.id }}">Вернуться к посту без отправки комментария</a>
+
+
+{% endblock content %}

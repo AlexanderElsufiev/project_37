@@ -1,0 +1,136 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}
+
+<!-- Название у нас будет products -->
+{% block title %}
+Post
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим все товары -->
+{% block content %}
+<style>
+/* CSS для разных статусов комментариев пользователя */
+.comment {
+    background-color: white; /* По умолчанию белый фон */
+    padding: 10px;margin: 10px 0;border-radius: 5px;}
+.comment-pending {
+    background-color: #fff3cd; /* Жёлтый фон для ожидающих */
+    border-left: 4px solid #ffc107;}
+.comment-approved {
+    background-color: #d4edda; /* Зелёный фон для одобренных */
+    border-left: 4px solid #28a745;}
+.comment-rejected {
+    background-color: #f8d7da; /* Красный фон для отклонённых */
+    border-left: 4px solid #dc3545;}
+</style>
+
+
+<h1>ОДИН ПОСТ (новость, статья) = post_privat_uno.html </h1>
+<!--{{ post }}-->
+  <table>
+      <tr>
+          <td>к какой категории отнесён пост</td>
+          <td>{{ post.category }}</td>
+      </tr>
+      <tr>
+          <td>заголовок</td>
+          <td>{{ post.zagolov|censor }}</td>
+      </tr>
+      <tr>
+          <td>дата публикации (в формате день.месяц.год)</td>
+          <td>{{ post.time_in|date:'d M Y'  }}</td>
+      </tr>
+      <tr>
+          <td>полный текст статьи (цензурированый)</td>
+          <td>{{ post.text|censor }}</td>
+      </tr>
+       </table>
+
+
+
+<!--<a href="/news/{{ post.id }}/edit/" style="background-color: #28a745;color: white;-->
+<!--    padding: 8px 16px;text-decoration: none;border-radius: 4px;-->
+<!--    display: inline-block;">Correct POST</a>-->
+
+<!--<input type="submit" value="Vozvrat_news" />-->
+<a href="/news/privat/" style="background-color: #28a745;color: white;
+    padding: 8px 16px;text-decoration: none;border-radius: 8px;
+    display: inline-block;">Vozvrat_news_privat</a>
+
+<a href="/news/{{ post.id }}/comment/" >НАПИСАТЬ ОТКЛИК=КОММЕНТАРИЙ</a>
+
+
+
+
+{% if object.media_files.all %}
+<h3>Медиафайлы:</h3>
+{% for media in object.media_files.all %}
+    <div>
+        {% if media.title %}<h4>{{ media.title }}</h4>{% endif %}
+
+        {% if media.media_type == 'image' %}
+            <img src="{{ media.file.url }}" alt="{{ media.title }}" width="300">
+        {% elif media.media_type == 'video' %}
+            <video width="300" controls>
+                <source src="{{ media.file.url }}" type="video/mp4">
+            </video>
+        {% elif media.media_type == 'audio' %}
+            <audio controls>
+                <source src="{{ media.file.url }}" type="audio/mpeg">
+            </audio>
+        {% elif media.media_type == 'document' %}
+            <a href="{{ media.file.url }}" target="_blank">📄 {{ media.file.name }}</a>
+        {% else %}
+            <a href="{{ media.file.url }}" target="_blank">📎 {{ media.file.name }}</a>
+        {% endif %}
+
+        {% if media.description %}<p>{{ media.description }}</p>{% endif %}
+    </div>
+{% endfor %}{% endif %}
+
+
+
+<h3>Комментарии:</h3>
+{% for comment in filtered_comments %}
+    <div class="comment
+            {% if comment.stat == '1' %}comment-pending{% endif %}
+            {% if comment.stat == '2' %}comment-approved{% endif %}
+            {% if comment.stat == '0' %}comment-rejected{% endif %}
+    ">
+
+<br>{{ comment.user }} - {{ comment.time_in }}:
+<br>{{ comment.comment }}
+
+
+<br>Статус комментария: {{ comment.get_stat_display }}
+        <br>
+{% if comment.stat != '2' %}
+<form method="post" action="{% url 'moderate_comment' post.id comment.id 'like' %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Принять</button>
+</form>
+{% endif %}
+<form method="post" action="{% url 'moderate_comment' post.id comment.id 'dislike' %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Отклонить</button>
+</form>
+
+<br>
+    </div>
+{% empty %}
+<br>Комментариев пока нет.
+{% endfor %}
+
+
+
+
+
+
+{% endblock content %}
+
+
+
+
+
+

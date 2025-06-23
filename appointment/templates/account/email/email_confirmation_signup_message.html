@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% load account %} <!-- Загружаем тег, который позволит получить нам ссылку на подтверждение -->
+    <h1>Спасибо пользователю {{ user.username }} что зарегистрировались на нашем сайте!</h1>
+    <h3>Можете пройти по <a href="{{ activate_url }}">ССЫЛКЕ</a> ведущей на наш портал</h3>
+     <!--  письмо записано в appointment/templates/account/email/email_confirmation_signup_message.html  -->
+</body>
+</html>

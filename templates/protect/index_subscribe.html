@@ -1,0 +1,17 @@
+
+{% extends "main.html" %}
+
+{% block content %}
+<h2>Страница авторизованного пользователя {{request.user.username}}</h2>
+<h2>Подписка на категории новостей</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+<button type="submit">Сохранить подписку!</button>
+<!--<button> <a href="subscribe/">подписаться </a> </button>-->
+</form>
+
+{% endblock %}
+
+

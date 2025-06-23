@@ -1,0 +1,128 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}
+{% load custom_tags %}
+
+<!-- Название у нас будет products -->
+{% block title %}
+Posts
+{% endblock title %}
+
+
+
+
+<!-- В контенте на странице мы выводим все товары -->
+{% block content %}
+    <h1>ФИЛЬТР НА ПОСТЫ</h1>
+   {# Добавляем форму, которая объединяет набор полей, которые будут отправляться в запросе #}
+   <form action="" method="get"  >
+<!--       {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}-->
+<!--       {{ filterset.form.as_p }}-->
+<!--            <div >-->
+<!--    {{ filterset.form.time_in__gt.label_tag }} {{ filterset.form.time_in__gt }}-->
+<!--    {{ filterset.form.time_in__lt.label_tag }} {{ filterset.form.time_in__lt }}-->
+<!--            </div>-->
+  <div>
+    {% for field in filterset.form %}
+      {% if field.name != 'time_in__gt' and field.name != 'time_in__lt' and field.name != 'raiting__gt' and field.name != 'raiting__lt' %}
+        <p>
+          {{ field.label_tag }} {{ field }}
+        </p>
+      {% endif %}
+      {% if field.name == 'time_in__gt'  %}
+        <p>
+            {{ filterset.form.time_in__gt.label_tag }} {{ filterset.form.time_in__gt }}
+            {{ filterset.form.time_in__lt.label_tag }} {{ filterset.form.time_in__lt }}
+        </p>
+      {% endif %}
+      {% if field.name == 'raiting__gt'  %}
+        <p>
+            {{ filterset.form.raiting__gt.label_tag }} {{ filterset.form.raiting__gt }}
+            {{ filterset.form.raiting__lt.label_tag }} {{ filterset.form.raiting__lt }}
+        </p>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+
+       {# Добавим кнопку отправки данных формы #}
+       <input type="submit" value="Найти" />
+   </form>
+
+   <h1>Все посты</h1>
+<!--Сверху страницы должно быть выведено количество всех новостей (используется фильтр news|length).-->
+<!--    <h1>Количество всех постов НА ДАННОМ ЛИСТЕ ={{ posts|length}}</h1>-->
+<!-- Используем переданную из представления переменную time_now и применяем к ней фильтр date. По назначению этот фильтр очень похож на метод strftime у объекта datetime в Python — вывод времени в указанном формате. -->
+<!--   <h3>ВРЕМЯ СЕЙЧАС, переменная класса = {{ time_now|date:'M d Y' }}</h3>-->
+<!--    <h3>ВРЕМЯ СЕЙЧАС = {% current_time '%b %d %Y' %}</h3>-->
+
+   <!-- Если в переменной next_sale будет None,
+   то выведется указанный в фильтре текст -->
+<!--   <h3> распродажи {{ next_sale|default_if_none:"Чуть позже сообщим о распродаже!" }}-->
+
+
+
+   <hr>
+   {% if posts %}
+       <table>
+           <tr>
+               <td>id</td>
+               <td>автор</td>
+               <td>заголовок</td>
+               <td>дата публикации </td>
+               <td> первые 20 сИМВОлов текста статьи</td>
+               <td>рейтинг</td>
+           </tr>
+
+
+           {% for post in posts %}
+           <tr>
+               <td>{{ post.id }}</td>
+               <td>{{ post.author }}</td>
+               <td>{{ post.zagolov|censor }}</td>
+               <td>{{ post.time_in|date:'d M Y'  }}</td>
+               <td>{{ post.text|censor|truncatechars:20 }}</td>
+<!--               <td>{{ post.text|censor|truncatewords:20 }}</td>-->
+               <td>{{ post.raiting}}</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+   {% else %}
+       <h2>Постов нет!</h2>
+   {% endif %}
+
+
+   {# Добавляем пагинацию на страницу #}
+<!--   {# в строке типа < a href="?page=... >-->
+<!--    фрагмент &{{ request.GET.urlencode }} не даёт забывать условие выборки при пагинации #}-->
+<!-- но это работало неправильно, посему замена на &{{ filter_query }}  -->
+
+{# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?page=1&{{ filter_query }}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           {% if page_obj.previous_page_number > 2 %}
+           ...
+           {% endif %}
+           <a href="?page={{ page_obj.previous_page_number }}&{{ filter_query }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}&{{ filter_query }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+            {% if paginator.num_pages|add:"-1" > page_obj.next_page_number %}
+           ...
+           {% endif %}
+           <a href="?page={{ page_obj.paginator.num_pages }}&{{ filter_query }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}
+
+
